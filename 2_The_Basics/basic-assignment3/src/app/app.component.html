@@ -1,0 +1,52 @@
+<div class="container">
+  <div class="row">
+    <div class="col-xs-12">
+      <ol>
+        <li *ngFor="let assignmetn of assignments; let i = index">
+          [ i = {{ i }}]{{ assignments[i] }}
+        </li>
+        <!-- <li>Add A button which says 'Display Details'</li>
+        <li>
+          Add a paragraph with any content of your choice (e.g. 'Secret Password
+          = tuna')
+        </li>
+        <li>
+          Toggle the displaying of that paragraph with the button created in the
+          first step
+        </li>
+        <li>
+          Log all button clicks in an array and output that array below the
+          secret paragraph (maybe log a timestamp or simply an incrementing
+          number)
+        </li>
+        <li>
+          Starting at the 5th log item, give all future log items a blue
+          background (via ngStyle) and white color (ngClass)
+        </li> -->
+      </ol>
+      <div class="row">
+        <div class="col-xs-12"></div>
+      </div>
+      <button class="btn btn-primary" (click)="changeDisplayDetailsStatus()">
+        {{ getButtonText() }}
+      </button>
+      <p *ngIf="displayDatails; else pressButtonToShowDetails">
+        Secret Password = tuna
+      </p>
+      <ng-template #pressButtonToShowDetails>
+        <p>Press Button to Show Details</p>
+      </ng-template>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <p
+        *ngFor="let date of pressedDates; let i = index"
+        [ngStyle]="{ backgroundColor: getBackgroundColor(i) }"
+        [ngClass]="{ 'white-text': i >= 5 }"
+      >
+        {{ date }}
+      </p>
+    </div>
+  </div>
+</div>
