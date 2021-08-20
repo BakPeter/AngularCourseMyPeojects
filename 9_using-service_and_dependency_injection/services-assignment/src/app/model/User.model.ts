@@ -1,3 +1,7 @@
 export class User {
-    constructor(public name:string, public activStatus:boolean){}
+  constructor(
+    public userId: number,
+    public name: string,
+    public activStatus: boolean
+  ) {}
 }

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { User } from '../model/User.model';
+import { UsersService } from '../services/users.service';
 
 @Component({
   selector: 'app-active-users',
@@ -7,16 +8,23 @@ import { User } from '../model/User.model';
   styleUrls: ['./active-users.component.css'],
 })
 export class ActiveUsersComponent implements OnInit {
-  users: User[] = [
-    new User('pete', true),
-    new User('eli', true),
-    new User('dana', true),
-  ];
-  constructor() {}
+  activeStatusMsg = 'Deactivate User';
+  users: User[];
+  constructor(private usersService: UsersService) {}
 
-  ngOnInit(): void {}
-
-  onSetToInactive(i: number) {
-    this.users[i].activStatus = false;
+  ngOnInit(): void {
+    this.users = this.usersService.getActiveUsers();
+    this.usersService.userActivationStatusUpdated.subscribe((user) => {
+      if (user.activStatus) this.users.push(user);
+    });
   }
+
+  setToInactive(ind: number) {
+    this.usersService.updateStatus(this.users[ind].userId, false);
+    this.users.splice(ind, 1);
+  }
+
+  // addUserTest() {
+  //   this.usersService.updateStatus(this.usersService.users[0].userId, true);
+  // }
 }
