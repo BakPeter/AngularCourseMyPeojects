@@ -1,48 +1,47 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, tap } from 'rxjs/operators';
+import { exhaustMap, map, take, tap } from 'rxjs/operators';
+import { AuthService } from '../auth/auth.service';
 
 import { Recipe } from '../recipes/recipe.model';
 import { RecipeService } from '../recipes/recipe.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataStorageService {
-  constructor(private http: HttpClient, private recipeService: RecipeService) {}
+  constructor(
+    private http: HttpClient,
+    private recipeService: RecipeService,
+    private authService: AuthService
+  ) {}
 
   fetchRecipes() {
     // console.log('data-storage.service fatch data');
-    this.http
-      .get<{ requestSuccess: true; errors: null; recipes: Recipe[] }>(
-        'api/getallrecipes',
-        {
+    return this.authService.user.pipe(
+      take(1),
+      exhaustMap((user) => {
+        return this.http.get<{
+          requestSuccess: true;
+          errors: null;
+          recipes: Recipe[];
+        }>('api/getallrecipes', {
           headers: new HttpHeaders({
             'Content-Type': 'application/json; charset=utf8',
             'Access-Control-Allow-Origin': '*',
           }),
-        }
-      )
-      .pipe(
-        map((responseData) => {
-          return responseData.recipes.map((recipe) => {
-            return {
-              ...recipe,
-              ingredeints: recipe.ingredeints ? recipe.ingredeints : [],
-            };
-          });
-        }),
-        tap((recipes: Recipe[]) => {
-          this.recipeService.setRecipes(recipes);
-        })
-      )
-      .subscribe(
-        (response) => {
-          // console.log(response.recipes);
-          this.recipeService.setRecipes(response);
-        },
-        (error) => {
-          console.log(error);
-        }
-      );
+        });
+      }),
+      map((responseData) => {
+        return responseData.recipes.map((recipe) => {
+          return {
+            ...recipe,
+            ingredeints: recipe.ingredeints ? recipe.ingredeints : [],
+          };
+        });
+      }),
+      tap((recipes: Recipe[]) => {
+        this.recipeService.setRecipes(recipes);
+      })
+    );
   }
 
   storeRecipes() {

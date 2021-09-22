@@ -20,13 +20,12 @@ export class RecipeResolverService implements Resolve<Recipe[]> {
     route: ActivatedRouteSnapshot,
     state: RouterStateSnapshot
   ): Recipe[] | Observable<Recipe[]> | Promise<Recipe[]> {
-    let recipes = this.recipesService.getRecipes();
+    const recipes = this.recipesService.getRecipes();
 
     if (recipes.length === 0) {
-      this.dataStorageService.fetchRecipes();
-      recipes = this.recipesService.getRecipes();
+      return this.dataStorageService.fetchRecipes();
+    } else {
+      return recipes;
     }
-
-    return recipes;
   }
 }
