@@ -1,9 +1,16 @@
-import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  ComponentFactoryResolver,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 
+import { AlertComponent } from '../shared/alert/alert.component';
+import { PlaceHolderDirective } from '../shared/place-holder/place-holder.directive';
 import { AuthResponseData, AuthService } from './auth.service';
 
 @Component({
@@ -15,8 +22,15 @@ export class AuthComponent implements OnInit {
   isLoginMode = true;
   isLoading = false;
   error: string = null;
+  @ViewChild(PlaceHolderDirective, { static: false })
+  alertHost: PlaceHolderDirective;
+  private closeSub: Subscription;
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private componentFactoryResolver: ComponentFactoryResolver
+  ) {}
 
   ngOnInit(): void {}
 
@@ -52,7 +66,7 @@ export class AuthComponent implements OnInit {
         if (response.errors) {
           this.errorAccoured(response.errors[0]);
         } else {
-          this.errorAccoured(null);
+          // this.errorAccoured(null);
           this.router.navigate(['/recipes']);
         }
       },
@@ -81,7 +95,23 @@ export class AuthComponent implements OnInit {
   }
 
   private errorAccoured(error: string) {
-    this.error = error;
+    // this.error = error;
+    this.showErrorAlert(error);
+  }
+
+  showErrorAlert(message: string) {
+    const alertCmpFactory =
+      this.componentFactoryResolver.resolveComponentFactory(AlertComponent);
+    const hostViewContainerRef = this.alertHost.viewContainerRef;
+    hostViewContainerRef.clear();
+
+    const componentRef = hostViewContainerRef.createComponent(alertCmpFactory);
+
+    componentRef.instance.message = message;
+    this.closeSub = componentRef.instance.close.subscribe(() => {
+      this.closeSub.unsubscribe();
+      hostViewContainerRef.clear();
+    });
   }
 
   private loadingStarted() {
@@ -90,5 +120,9 @@ export class AuthComponent implements OnInit {
 
   private loadingFinished() {
     this.isLoading = false;
+  }
+
+  onHandleError() {
+    this.error = null;
   }
 }
